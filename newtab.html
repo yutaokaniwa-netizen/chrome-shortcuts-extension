@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新しいタブ</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- 右上の時計 -->
+  <div class="clock-container">
+    <span class="clock" id="clock"></span>
+    <span class="date-separator">|</span>
+    <span class="date" id="date"></span>
+  </div>
+  
+  <div class="container">
+    <div class="search-container">
+      <form id="search-form" action="https://www.google.com/search" method="GET">
+        <div class="search-box">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <path d="M21 21l-4.35-4.35"></path>
+          </svg>
+          <input type="text" name="q" id="search-input" placeholder="Google で検索" autocomplete="off">
+        </div>
+      </form>
+    </div>
+    
+    <div class="shortcuts-header">
+      <span class="shortcuts-count" id="shortcuts-count">0 個のショートカット</span>
+      <div class="header-actions">
+        <button class="add-btn" id="add-group-btn" title="グループを追加">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            <line x1="12" y1="11" x2="12" y2="17"></line>
+            <line x1="9" y1="14" x2="15" y2="14"></line>
+          </svg>
+        </button>
+        <button class="add-btn add-btn-primary" id="add-shortcut-btn" title="ショートカットを追加">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+    
+    <div class="shortcuts-container" id="shortcuts-container">
+      <!-- グループとショートカットはJSで動的に生成 -->
+    </div>
+  </div>
+  
+  <!-- ショートカット追加/編集モーダル -->
+  <div class="modal-overlay" id="shortcut-modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="shortcut-modal-title">ショートカットを追加</h2>
+        <button class="modal-close" id="shortcut-modal-close">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <form id="shortcut-form">
+        <div class="form-group">
+          <label for="shortcut-name">名前</label>
+          <input type="text" id="shortcut-name" placeholder="例: Google" required>
+        </div>
+        <div class="form-group">
+          <label for="shortcut-url">URL</label>
+          <input type="url" id="shortcut-url" placeholder="例: https://google.com" required>
+        </div>
+        <div class="form-group">
+          <label for="shortcut-group">グループ</label>
+          <select id="shortcut-group">
+            <!-- JSで動的に生成 -->
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="shortcut-icon">カスタムアイコン（任意）</label>
+          <div class="icon-input-container">
+            <div class="icon-preview" id="icon-preview">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21,15 16,10 5,21"></polyline>
+              </svg>
+            </div>
+            <input type="url" id="shortcut-icon" placeholder="画像URL（空欄で自動取得）">
+          </div>
+          <span class="form-hint">PNG/JPG/SVGのURLを入力。空欄の場合はサイトのアイコンを自動取得します。</span>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="shortcut-modal-cancel">キャンセル</button>
+          <button type="submit" class="btn btn-primary" id="shortcut-modal-save">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- グループ追加/編集モーダル -->
+  <div class="modal-overlay" id="group-modal-overlay">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="group-modal-title">グループを追加</h2>
+        <button class="modal-close" id="group-modal-close">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <form id="group-form">
+        <div class="form-group">
+          <label for="group-name">グループ名</label>
+          <input type="text" id="group-name" placeholder="例: 仕事" required>
+        </div>
+        <div class="form-group">
+          <label>カラー</label>
+          <div class="color-options" id="group-color-options">
+            <!-- JSで動的に生成 -->
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" id="group-modal-cancel">キャンセル</button>
+          <button type="submit" class="btn btn-primary" id="group-modal-save">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- コンテキストメニュー -->
+  <div class="context-menu" id="context-menu">
+    <button class="context-menu-item" id="context-edit">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+      </svg>
+      編集
+    </button>
+    <button class="context-menu-item context-menu-item-danger" id="context-delete">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3,6 5,6 21,6"></polyline>
+        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+      </svg>
+      削除
+    </button>
+  </div>
+  
+  <script src="script.js"></script>
+</body>
+</html>
