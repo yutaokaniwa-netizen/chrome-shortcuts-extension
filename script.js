@@ -200,8 +200,38 @@ class ShortcutManager {
       if (e.key === 'Escape') {
         this.closeShortcutModal();
         this.closeGroupModal();
+        this.closeSettingsModal();
         this.closeContextMenu();
       }
+    });
+    
+    // 設定モーダル
+    document.getElementById('settings-btn').addEventListener('click', () => {
+      this.openSettingsModal();
+    });
+    document.getElementById('settings-modal-close').addEventListener('click', () => {
+      this.closeSettingsModal();
+    });
+    document.getElementById('settings-modal-overlay').addEventListener('click', (e) => {
+      if (e.target.id === 'settings-modal-overlay') {
+        this.closeSettingsModal();
+      }
+    });
+    
+    // エクスポート/インポート
+    document.getElementById('export-btn').addEventListener('click', () => {
+      this.exportData();
+    });
+    document.getElementById('import-btn').addEventListener('click', () => {
+      document.getElementById('import-file-input').click();
+    });
+    document.getElementById('import-file-input').addEventListener('change', (e) => {
+      this.importData(e);
+    });
+    
+    // データ削除
+    document.getElementById('reset-btn').addEventListener('click', () => {
+      this.resetAllData();
     });
   }
   
@@ -791,6 +821,111 @@ class ShortcutManager {
     menu.classList.remove('active');
     this.contextTarget = null;
     this.contextType = null;
+  }
+  
+  // 設定モーダルを開く
+  openSettingsModal() {
+    const modal = document.getElementById('settings-modal-overlay');
+    modal.classList.add('active');
+  }
+  
+  // 設定モーダルを閉じる
+  closeSettingsModal() {
+    const modal = document.getElementById('settings-modal-overlay');
+    modal.classList.remove('active');
+  }
+  
+  // データをエクスポート
+  exportData() {
+    const data = {
+      version: '1.0',
+      exportedAt: new Date().toISOString(),
+      shortcuts: this.shortcuts,
+      groups: this.groups
+    };
+    
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `unlimited-shortcuts-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    this.closeSettingsModal();
+    alert('エクスポートが完了しました！');
+  }
+  
+  // データをインポート
+  async importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      
+      // バリデーション
+      if (!data.shortcuts || !Array.isArray(data.shortcuts)) {
+        throw new Error('無効なファイル形式です');
+      }
+      
+      // 確認ダイアログ
+      const confirmMsg = `インポートすると現在のデータが上書きされます。\n\n` +
+        `インポートするデータ:\n` +
+        `・ショートカット: ${data.shortcuts.length}件\n` +
+        `・グループ: ${data.groups?.length || 0}件\n\n` +
+        `続行しますか？`;
+      
+      if (!confirm(confirmMsg)) {
+        event.target.value = '';
+        return;
+      }
+      
+      // データを適用
+      this.shortcuts = data.shortcuts;
+      this.groups = data.groups || [...this.defaultGroups];
+      
+      // マイグレーション
+      this.migrateData();
+      
+      await this.saveData();
+      this.render();
+      
+      this.closeSettingsModal();
+      alert('インポートが完了しました！');
+      
+    } catch (error) {
+      alert('インポートに失敗しました: ' + error.message);
+    }
+    
+    // ファイル入力をリセット
+    event.target.value = '';
+  }
+  
+  // すべてのデータを削除
+  async resetAllData() {
+    const confirmMsg = '本当にすべてのデータを削除しますか？\n\n' +
+      'この操作は元に戻せません。\n' +
+      '事前にエクスポートしてバックアップを取ることをおすすめします。';
+    
+    if (!confirm(confirmMsg)) return;
+    
+    // 二重確認
+    if (!confirm('最終確認: 本当に削除しますか？')) return;
+    
+    this.shortcuts = [];
+    this.groups = [...this.defaultGroups];
+    
+    await this.saveData();
+    this.render();
+    
+    this.closeSettingsModal();
+    alert('すべてのデータを削除しました。');
   }
   
   // HTMLエスケープ

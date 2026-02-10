@@ -42,18 +42,24 @@ body {
   padding: 16px 24px;
 }
 
-/* Clock - 右上に小さく表示 */
-.clock-container {
+/* Top Header - 右上 */
+.top-header {
   position: fixed;
   top: 12px;
   right: 20px;
   display: flex;
   align-items: center;
+  gap: 16px;
+  z-index: 100;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.clock-container {
+  display: flex;
+  align-items: center;
   gap: 8px;
   font-size: 13px;
   color: var(--text-secondary);
-  z-index: 100;
-  animation: fadeIn 0.4s ease-out;
 }
 
 .clock {
@@ -69,6 +75,31 @@ body {
 .date {
   font-size: 13px;
   color: var(--text-secondary);
+}
+
+.settings-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.settings-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.settings-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  transform: rotate(30deg);
 }
 
 /* Search - コンパクトに */
@@ -776,4 +807,86 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
+}
+
+/* Settings Modal */
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settings-section {
+  padding: 16px;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+}
+
+.settings-section h3 {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: var(--text-primary);
+}
+
+.settings-description {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+
+.settings-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.settings-buttons .btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.settings-buttons .btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.settings-section-danger {
+  background: rgba(234, 67, 53, 0.08);
+  border: 1px solid rgba(234, 67, 53, 0.2);
+}
+
+.settings-section-danger h3 {
+  color: var(--danger);
+}
+
+.btn-danger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 500;
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-danger svg {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-danger:hover {
+  background: var(--danger);
+  color: white;
 }
